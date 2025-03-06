@@ -67,3 +67,39 @@ def logout_user():
         db.session.commit()
     return jsonify({'message':'Logged out successfully'}), 200
 
+# Endpoints para CRUD de usuarios
+@app.route('users', methods=['POST'])
+@require_api_key
+def create_user():
+    data = request.get_json()
+    new_user = User(name=data['name'], email=data['email'], password=generate_password_hash(data['password'], method='sha256'))
+    db.session.add(new_user)
+    db.session.commit()
+    return jsonify({'message':'User created successfully'}), 201
+
+@app.route('/users/<int:id>', methods=['PUT'])
+@require_api_key
+def update_user(id):
+    data = request.get_json()
+    user = User.query.get(id)
+    if not user:
+        return jsonify({'message':'User not found'}), 404
+    
+    user.name = data['name']
+    user.email = data['email']
+    if 'password' in data:
+        user.password = generate_password_hash(data['password'], methods='sha256')
+    db.session.commit()
+    return jsonify({'message':'User updated successfully'}), 200
+
+@app.route('/users/<int:id>', methods=['DELETE'])
+@require_api_key
+def delete_user(id):
+    user = User.query.get(id)
+    if not user:
+        return jsonify({'message':'User not found'}), 404
+    
+    db.session.delete(user)
+    db.session.commit()
+    return jsonify({'message':'User deleted successfully'}), 200
+
