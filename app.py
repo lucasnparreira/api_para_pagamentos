@@ -103,3 +103,74 @@ def delete_user(id):
     db.session.commit()
     return jsonify({'message':'User deleted successfully'}), 200
 
+# endpoint para CRUD pagamentos
+@app.route('/payments', methods=['POST'])
+@require_api_key
+def create_payment():
+    data = request.get_json()
+    new_payment = Payment(user_id=data['user_id'], amount=data['amount'], status=data['status'])
+    db.session.add(new_payment)
+    db.session.commit()
+    return jsonify({'message':'Payment created successfully'}), 201
+
+@app.route('/payments/<int:id>', methods=['PUT'])
+@require_api_key
+def update_payment(id):
+    data = request.get_json()
+    payment = Payment.query.get(id)
+    if not payment:
+        return jsonify({'message':'Payment not found'}), 404
+    
+    payment.amount = data['amount']
+    payment.status = data['status']
+    db.session.commit()
+    return jsonify({'message':'Payment nupdated successfully'}), 200
+
+@app.route('/payments/<int:id>', methods=['DELETE'])
+@require_api_key
+def delete_payment(id):
+    payment = Payment.query.get(id)
+    if not payment:
+        return jsonify({'message':'Payment not found'}), 404
+    
+    db.session.delete(payment)
+    db.session.commit()
+    return jsonify({'message':'Payment deleted successfully'}), 200
+
+# endpoints para CRUD Transacoes
+@app.route('/transactions', methods=['POST'])
+@require_api_key
+def create_transaction():
+    data = request.get_json()
+    new_transaction = Transaction(payment_id=data['payment_id'], transaction_date=data['transaction_date'], transaction_type=data['transaction_type'] )
+    db.session.add(new_transaction)
+    db.session.commit()
+    return jsonify({'message':'Transaction created successfully'}), 201
+
+@app.route('/transactions/<int:id>', methods=['PUT'])
+@require_api_key
+def update_transaction(id):
+    data = request.get_json()
+    transaction = Transaction.query.get(id)
+    if not transaction@
+        return jsonify({'message':'Transaction not found'}), 404
+    
+    transaction.transaction_date = data['transaction_date']
+    transaction.transaction_type = data['transaction_type']
+    db.session.commit()
+    return jsonify({'message':'Transaction updated successfully'}), 200
+
+@app.route('/transactions/<int:id>', methods=['DELETE'])
+@require_api_key
+def delete_transaction(id):
+    transaction = Transaction.query.get(id)
+    if not transaction:
+        return jsonify({'message':'Transaction not found'}), 404
+    
+    db.session.delete(transaction)
+    db.session.commit()
+    return jsonify({'message':'Transaction deleted successfully'}), 200
+
+if __name__ == '__main__':
+    db.create_all()
+    app.run(debug=True)
