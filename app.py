@@ -89,15 +89,16 @@ def logout_user():
     return jsonify({'message':'Logged out successfully'}), 200
 
 # Endpoints para CRUD de usuarios
-@app.route('/users', methods=['POST'])
-@require_api_key
-def create_user():
-    data = request.get_json()
-    new_user = User(name=data['name'], email=data['email'], password=generate_password_hash(data['password'], method='pbkdf2:sha256'))
-    db.session.add(new_user)
-    db.session.commit()
+# endpoint removido pois o usuario ja é criado ao ser registrado no endpoint register
+# @app.route('/users', methods=['POST'])
+# @require_api_key
+# def create_user():
+#     data = request.get_json()
+#     new_user = User(name=data['name'], email=data['email'], password=generate_password_hash(data['password'], method='pbkdf2:sha256'))
+#     db.session.add(new_user)
+#     db.session.commit()
 
-    return jsonify({'message':'User created successfully'}), 201
+#     return jsonify({'message':'User created successfully'}), 201
 
 @app.route('/users/<int:id>', methods=['PUT'])
 @require_api_key

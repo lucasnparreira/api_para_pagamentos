@@ -88,25 +88,6 @@ Resposta (200 OK):
 ]
 ```
 
-**Método:** POST
-
-**Descrição:** Cria um novo usuário.
-
-Corpo da requisição (JSON):
-```json
-{
-    "name": "João Silva",
-    "email": "joao.silva@example.com",
-    "password": "password123"
-}
-```
-Resposta (201 Created):
-```json
-{
-    "message": "User created successfully"
-}
-```
-
 **Método:** PUT
 
 **Descrição:** Atualiza um usuário existente.
@@ -153,6 +134,58 @@ Resposta (200 OK):
     "api_key_expiration": "2025-03-07T10:00:00"
 }
 ```
+
+### **/account**
+**Método:** POST
+
+**Descrição:** Cadastra uma nova conta.
+
+**Cabeçalho (x-api-key):** <insira a api-key gerada no cabeçalho (head)>
+
+**Corpo da requisição (JSON):**
+```json
+{
+	"user_id":"2",
+	"cash_account":1000.00
+}
+```
+
+### **/accounts**
+**Método:** GET
+
+**Descrição:** Lista todas as contas cadastradas.
+
+**Cabeçalho (x-api-key):** <insira a api-key gerada no cabeçalho (head)>
+
+
+### **/accounts/id**
+**Método:** GET
+
+**Descrição:** Lista uma conta especifica.
+
+**Cabeçalho (x-api-key):** <insira a api-key gerada no cabeçalho (head)>
+
+
+**Método:** PUT
+
+**Descrição:** Atualiza conta especifica.
+
+**Cabeçalho (x-api-key):** <insira a api-key gerada no cabeçalho (head)>
+
+**Corpo da requisição (JSON):**
+```json
+{
+	"user_id":"2",
+	"cash_account":1001.00
+}
+```
+
+**Método:** DELETE
+
+**Descrição:** Deleta conta especifica.
+
+**Cabeçalho (x-api-key):** <insira a api-key gerada no cabeçalho (head)>
+
 
 ### **/transactions**
 **Método:** GET
