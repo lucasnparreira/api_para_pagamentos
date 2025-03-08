@@ -31,6 +31,13 @@ class Transaction(db.Model):
     transaction_date = db.Column(db.DateTime, nullable=False)
     transaction_type = db.Column(db.String(20), nullable=False)
 
+class Account(db.Model):
+    __tablename__ = 'accounts'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    cash_account = db.Column(db.Float, nullable=False, default=0.0)
+    date_open_account = db.Column(db.DateTime, nullable=False, default=datetime.now)
+
 def require_api_key(f):
     @functools.wraps(f)  # Isso evita a sobrescrita do nome da função
     def decorated_function(*args, **kwargs):
@@ -89,6 +96,7 @@ def create_user():
     new_user = User(name=data['name'], email=data['email'], password=generate_password_hash(data['password'], method='pbkdf2:sha256'))
     db.session.add(new_user)
     db.session.commit()
+
     return jsonify({'message':'User created successfully'}), 201
 
 @app.route('/users/<int:id>', methods=['PUT'])
@@ -147,20 +155,117 @@ def get_user(id):
             'api_key_expiration':user.api_key_expiration
     }), 200
 
+# CRUD para contas
+@app.route('/account', methods=['POST'])
+@require_api_key
+def create_account():
+    data = request.get_json()
+    
+    if 'user_id' not in data:
+        return jsonify({'error':'user_id is required'}), 400
+    
+    new_account = Account(
+        user_id=data['user_id'],
+        cash_account=data.get('cash_account', 0.0),
+        date_open_account=datetime.now()
+        )
+    
+    db.session.add(new_account)
+    db.session.commit()
+
+    return jsonify({'message':'Account created successfully'}), 201
+
+@app.route('/account/<int:id>', methods=['PUT'])
+@require_api_key
+def update_account(id):
+    data = request.get_json()
+    account = Account.query.get(id)
+    if not account:
+        return jsonify({'message':'Account not found'}), 404
+    
+    if 'user_id' in data:
+        account.user_id = data['user_id']
+    
+    if 'cash_account' in data:
+        account.cash_account = data['cash_account']
+
+    db.session.commit()
+
+    return jsonify({'message':'Account updated successfully'}), 200
+
+@app.route('/account/<int:id>', methods=['DELETE'])
+@require_api_key
+def delete_account(id):
+    account = Account.query.get(id)
+
+    if not account:
+        return jsonify({'message':'Account not found'}), 404
+    
+    db.session.delete(account)
+    db.session.commit()
+    return jsonify({'message':'Account deleted successfully'}), 200
+
+@app.route('/accounts', methods=['GET'])
+@require_api_key
+def get_accounts():
+    accounts = Account.query.join(User, Account.user_id == User.id).add_columns(
+        Account.id, Account.user_id, User.name, Account.cash_account, Account.date_open_account   
+    ).all()
+    accounts_list = []
+    for account in accounts:
+        accounts_list.append({
+            'id':account.id,
+            'user_id':account.user_id,
+            'name':account.name,
+            'cash_account':account.cash_account,
+            'date_open_account':account.date_open_account
+        })
+    return jsonify(accounts_list), 200
+    
+@app.route('/account/<int:id>', methods=['GET'])
+@require_api_key
+def get_account(id):
+    account = Account.query.get(id)
+    if not account:
+        return jsonify({'message':'Account not found'}), 404
+    
+    return jsonify({
+        'id':account.id,
+        'user_id':account.user_id,
+        'cash_account':account.cash_account,
+        'date_open_account':account.date_open_account
+    }), 200
+
 # endpoint para CRUD pagamentos
 @app.route('/payments', methods=['POST'])
 @require_api_key
 def create_payment():
     data = request.get_json()
-    
-    if isinstance(data, list):
-        for payment_data in data:
-            new_payment = Payment(user_id=payment_data['user_id'], amount=payment_data['amount'], status=payment_data['status'])
-            db.session.add(new_payment)
-    else:
-        new_payment = Payment(user_id=data['user_id'], amount=data['amount'], status=data['status'])
-        db.session.add(new_payment)
-    
+
+    payments = data if isinstance(data, list) else [data]
+
+    for payment_data in payments:
+        account = Account.query.get(payment_data['user_id'])
+
+        if not account:
+            return jsonify({'error':f"Account not found for user_id {payment_data['user_id']}"}), 404
+
+        if payment_data['status'] == 'Credit':
+            account.cash_account += payment_data['amount']
+        
+        else:
+            if account.cash_account >= payment_data['amount']:
+                account.cash_account -= payment_data['amount']
+            else:
+                return jsonify({'error':'Insuficient funds'}), 400
+        
+        new_payment = Payment(
+            user_id = payment_data['user_id'],
+            amount=payment_data['amount'],
+            status=payment_data['status']
+        )
+        db.session.add(new_payment) 
+
     db.session.commit()
     return jsonify({'message':'Payment created successfully'}), 201
 
