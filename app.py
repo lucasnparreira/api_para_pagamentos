@@ -4,10 +4,13 @@ from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 import functools
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///payments.db'
 db = SQLAlchemy(app)
+
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -16,6 +19,7 @@ class User(db.Model):
     password = db.Column(db.String(256), nullable=False)
     api_key = db.Column(db.String(36), unique=True, nullable=False)
     api_key_expiration = db.Column(db.DateTime, nullable=True)
+    role = db.Column(db.String(30), nullable=False, default='User')
 
 class Payment(db.Model):
     __tablename__ = 'payments'
@@ -50,16 +54,23 @@ def require_api_key(f):
 
 @app.route('/register', methods=['POST'])
 def register_user():
+    auth_user = User.query.filter_by(api_key=request.headers.get('x-api-key')).first()
+
+    if not auth_user or auth_user.role != 'Admin':
+        return jsonify({'message':'Permission denied. Admin role required.'}), 403
+    
     data = request.get_json()
     hashed_password = generate_password_hash(data['password'], method='pbkdf2:sha256')
     api_key = str(uuid.uuid4())
-    api_key_expiration = datetime.utcnow() + timedelta(minutes=5)
+    api_key_expiration = datetime.now() + timedelta(minutes=5)
+
     new_user = User(
         name=data['name'], 
         email=data['email'], 
         password=hashed_password, 
         api_key=api_key,
-        api_key_expiration=api_key_expiration
+        api_key_expiration=api_key_expiration,
+        role=data['role']
     )
 
     db.session.add(new_user)
@@ -137,7 +148,8 @@ def get_users():
             'name':user.name,
             'email':user.email,
             'api_key':user.api_key,
-            'api_key_expiration':user.api_key_expiration
+            'api_key_expiration':user.api_key_expiration,
+            'role':user.role
         })
     return jsonify(users_list), 200
 
@@ -153,7 +165,8 @@ def get_user(id):
             'name':user.name,
             'email':user.email,
             'api_key':user.api_key,
-            'api_key_expiration':user.api_key_expiration
+            'api_key_expiration':user.api_key_expiration,
+            'role':user.role
     }), 200
 
 # CRUD para contas
