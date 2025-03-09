@@ -52,6 +52,23 @@ def require_api_key(f):
         return f(*args, **kwargs)
     return decorated_function
 
+def insert_default_admin():
+    """Insere um usario admin padrao caso nao exista"""
+    admin = User.query.filter_by(role="Admin").first()
+
+    if not admin:
+        hashed_password = generate_password_hash("Admin", method="pbkdf2:sha256")
+        admin_user = User(
+            name="Admin",
+            email="admin@example.com",
+            password=hashed_password,
+            role="Admin",
+            api_key=uuid
+        )
+        db.session.add(admin_user)
+        db.session.commit()
+        print("Banco inicializado com sucesso!")
+
 @app.route('/register', methods=['POST'])
 def register_user():
     auth_user = User.query.filter_by(api_key=request.headers.get('x-api-key')).first()
@@ -392,7 +409,7 @@ def get_transaction(id):
     }), 200
 
 if __name__ == '__main__':
-    #db.create_all()
     with app.app_context():
         db.create_all()
     app.run(debug=True)
+    insert_default_admin()
