@@ -47,7 +47,7 @@ def require_api_key(f):
     def decorated_function(*args, **kwargs):
         api_key = request.headers.get('x-api-key')
         user = User.query.filter_by(api_key=api_key).first()
-        if not api_key or not user or user.api_key_expiration < datetime.utcnow():
+        if not api_key or not user or user.api_key_expiration < datetime.now():
             return jsonify({'message': 'Invalid or expired API Key'}), 403
         return f(*args, **kwargs)
     return decorated_function
@@ -85,7 +85,7 @@ def login_user():
         return jsonify({'message':'Invalid credentials'}), 401
     
     user.api_key = str(uuid.uuid4())
-    user.api_key_expiration = datetime.utcnow() + timedelta(minutes=5) # chave valida por 5 min
+    user.api_key_expiration = datetime.now() + timedelta(minutes=5) # chave valida por 5 min
     db.session.commit()
     return jsonify({'api_key': user.api_key}), 200
 
@@ -100,17 +100,6 @@ def logout_user():
     return jsonify({'message':'Logged out successfully'}), 200
 
 # Endpoints para CRUD de usuarios
-# endpoint removido pois o usuario ja é criado ao ser registrado no endpoint register
-# @app.route('/users', methods=['POST'])
-# @require_api_key
-# def create_user():
-#     data = request.get_json()
-#     new_user = User(name=data['name'], email=data['email'], password=generate_password_hash(data['password'], method='pbkdf2:sha256'))
-#     db.session.add(new_user)
-#     db.session.commit()
-
-#     return jsonify({'message':'User created successfully'}), 201
-
 @app.route('/users/<int:id>', methods=['PUT'])
 @require_api_key
 def update_user(id):
@@ -173,6 +162,11 @@ def get_user(id):
 @app.route('/account', methods=['POST'])
 @require_api_key
 def create_account():
+    auth_user = User.query.filter_by(api_key=request.headers.get('x-api-key')).first()
+
+    if not auth_user or auth_user.role != 'Admin':
+        return jsonify({'message':'Permission denied. Admin role required.'}), 403
+    
     data = request.get_json()
     
     if 'user_id' not in data:
