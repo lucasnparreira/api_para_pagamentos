@@ -15,9 +15,9 @@
 <body>
     <div class="menu">
         <button onclick="showScreen('login')">Login</button>
-        <button onclick="showScreen('register')">Registro</button>
         <button onclick="showScreen('users')">Usuários</button>
         <button onclick="showScreen('accounts')">Contas</button>
+        <button onclick="showScreen('payments')">Pagamentos</button>
     </div>
 
     <div id="login" class="container">
@@ -32,21 +32,95 @@
         <input type="text" id="name" placeholder="Nome">
         <input type="email" id="email" placeholder="Email">
         <input type="password" id="password" placeholder="Senha">
-        <input type="role" id="role" placeholder="Grupo">
-        <button onclick="registerUser()">Registrar</button>
+        <button onclick="registerUser()">Registrar usuário</button>
     </div>
 
     <div id="users" class="container">
         <h2>Usuários</h2>
         <button onclick="listUsers()">Listar Usuários</button>
+        <button onclick="showScreen('register')">Registrar Usuário</button>
+        <button onclick="showScreen('editUser')">Editar Usuário</button>
+        <button onclick="showScreen('deleteUser')">Deletar Usuário</button>
         <div id="usersList"></div>
     </div> 
+
+    <div id="editUser" class="container">
+        <h2>Editar Usuário</h2>
+        <input type="text" id="editUserId" placeholder="ID do Usuário">
+        <input type="text" id="editUserName" placeholder="Novo Nome">
+        <input type="email" id="editUserEmail" placeholder="Novo Email">
+        <input type="password" id="editUserPassword" placeholder="Nova Senha">
+        <button onclick="editUser()">Salvar Alterações</button>
+    </div> 
+
+    <div id="deleteUser" class="container">
+        <h2>Deletar Usuário</h2>
+        <input type="text" id="deleteUserId" placeholder="ID do Usuário">
+        <button onclick="deleteUser()">Deletar</button>
+    </div>
+
+    <div id="payments" class="container">
+        <h2>Pagamentos</h2>
+        <button onclick="listPayments()">Listar Pagamentos</button>
+        <button onclick="showScreen('createPayment')">Registrar Pagamento</button>
+        <button onclick="showScreen('editPayment')">Editar Pagamento</button>
+        <button onclick="showScreen('deletePayment')">Deletar Pagamento</button>
+        <div id="paymentList"></div>
+    </div>
+    
+    <div id="createPayment" class="container">
+        <h2>Criar Pagamento</h2>
+        <input type="text" id="paymentUserId" placeholder="ID do Usuário">
+        <input type="number" id="paymentAmount" placeholder="Valor do Pagamento">
+        <input type="text" id="paymentStatus" placeholder="Debit ou Credit">
+        <button onclick="createPayment()">Registrar Pagamento</button>
+    </div>
+    
+    <div id="editPayment" class="container">
+        <h2>Editar Pagamento</h2>
+        <input type="text" id="editPaymentId" placeholder="ID do Pagamento">
+        <input type="number" id="editPaymentAmount" placeholder="Novo Valor do Pagamento">
+        <input type="text" id="editPaymentStatus" placeholder="Debit ou Credit">
+        <button onclick="editPayment()">Salvar Alterações</button>
+    </div>
+    
+    <div id="deletePayment" class="container">
+        <h2>Deletar Pagamento</h2>
+        <input type="text" id="deletePaymentId" placeholder="ID do Pagamento">
+        <button onclick="deletePayment()">Deletar Pagamento</button>
+    </div>
 
     <div id="accounts" class="container">
         <h2>Contas</h2>
         <button onclick="listAccounts()">Listar Contas</button>
+        <button onclick="showScreen('createAccount')">Registrar Usuário</button>
+        <!-- <button onclick="showScreen('editUser')">Editar Usuário</button> -->
+        <button onclick="showScreen('deleteAccount')">Deletar Usuário</button>
         <div id="accountList"></div>
     </div>
+
+    <div id="createAccount" class="container">
+        <h2>Criar Conta</h2>
+        <input type="text" id="accountUserId" placeholder="ID do Usuario">
+        <input type="number" id="accountBalance" placeholder="Saldo Inicial">
+        <button onclick="createAccount()">Registrar conta</button>
+    </div>
+
+    <!-- <div id="editAccount" class="container">
+        <h2>Editar Conta</h2>
+        <input type="text" id="editUserId" placeholder="ID do Usuário">
+        <input type="text" id="editUserName" placeholder="Novo Nome">
+        <input type="email" id="editUserEmail" placeholder="Novo Email">
+        <input type="password" id="editUserPassword" placeholder="Nova Senha">
+        <button onclick="editUser()">Salvar Alterações</button>
+    </div>  -->
+
+    <div id="deleteAccount" class="container">
+        <h2>Deletar Conta</h2>
+        <input type="text" id="deleteAccountId" placeholder="ID do Usuário">
+        <button onclick="deleteUser()">Deletar Conta</button>
+    </div>
+
 
     <script>
         let apiKey = "";
@@ -94,16 +168,154 @@
                 headers: { 'x-api-key': apiKey }
             });
             const users = await response.json();
-            document.getElementById('usersList').innerHTML = users.map(user => `<p>${user.name} - ${user.email}</p>`).join('');
+            document.getElementById('usersList').innerHTML = users.map(user => 
+                `<p>${user.id} - ${user.name} - ${user.email}
+                 <button onclick="preFillEdit('${user.id}', '${user.name}', '${user.email}')">✏️</button>
+                 <button onclick="deleteUser('${user.id}')">🗑️</button></p>`).join('');
         }
 
+        function preFillEdit(id, name, email) {
+            document.getElementById('editUserId').value = id;
+            document.getElementById('editUserName').value = name;
+            document.getElementById('editUserEmail').value = email;
+            showScreen('editUser');
+        }
+
+        async function editUser() {
+            const userId = document.getElementById('editUserId').value;
+            const response = await fetch(`http://127.0.0.1:5000/user/${userId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey },
+                body: JSON.stringify({
+                    name: document.getElementById('editUserName').value,
+                    email: document.getElementById('editUserEmail').value
+                })
+            });
+            alert((await response.json()).message);
+            listUsers();
+            showScreen('users');
+        }
+
+        async function deleteUser(userId = null) {
+            if (!userId) {
+                userId = document.getElementById('deleteUserId').value;
+            }
+            const response = await fetch(`http://127.0.0.1:5000/user/${userId}`, {
+                method: 'DELETE',
+                headers: { 'x-api-key': apiKey }
+            });
+            alert((await response.json()).message);
+            listUsers();
+        }
+        
         async function listAccounts() {
             const response = await fetch('http://127.0.0.1:5000/accounts', {
                 method: 'GET',
                 headers: { 'x-api-key': apiKey }
             });
             const accounts = await response.json();
-            document.getElementById('accountList').innerHTML = accounts.map(account => `<p>${account.user_id} - ${account.name} - ${account.cash_account} - ${account.date_open_account}</p>`).join('');
+            document.getElementById('accountList').innerHTML = accounts.map(account => 
+                `<p>${account.user_id} - ${account.name} - ${account.cash_account} - ${account.date_open_account}</p>`).join('');
+        }
+
+        // function preFillEditAccounts(id, name, cash_account, date_open_account) {
+        //     document.getElementById('editUserId').value = id;
+        //     document.getElementById('editAName').value = name;
+        //     document.getElementById('editUserEmail').value = email;
+        //     showScreen('editUser');
+        // }
+        
+        async function createAccount() {
+            const response = await fetch('http://127.0.0.1:5000/account', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey },
+                body: JSON.stringify({
+                    user_id: document.getElementById('accountUserId').value,
+                    cash_account: parseFloat(document.getElementById('accountBalance').value)
+                })
+            });
+            alert((await response.json()).message);
+            listAccounts();
+            showScreen('accounts');
+        }
+
+
+        // async function editUser() {
+        //     const userId = document.getElementById('editUserId').value;
+        //     const response = await fetch(`http://127.0.0.1:5000/user/${userId}`, {
+        //         method: 'PUT',
+        //         headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey },
+        //         body: JSON.stringify({
+        //             name: document.getElementById('editUserName').value,
+        //             email: document.getElementById('editUserEmail').value
+        //         })
+        //     });
+        //     alert((await response.json()).message);
+        //     listUsers();
+        //     showScreen('users');
+        // }
+
+        async function deleteAccount(userId = null) {
+            if (!userId) {
+                userId = document.getElementById('deleteAccountId').value;
+            }
+            const response = await fetch(`http://127.0.0.1:5000/user/${userId}`, {
+                method: 'DELETE',
+                headers: { 'x-api-key': apiKey }
+            });
+            alert((await response.json()).message);
+            listAccounts();
+        }
+
+        async function listPayments() {
+            const response = await fetch('http://127.0.0.1:5000/payments', {
+                method: 'GET',
+                headers: { 'x-api-key': apiKey }
+            });
+            const payments = await response.json();
+            document.getElementById('paymentList').innerHTML = payments.map(payment => 
+                `<p>${payment.id} - ${payment.user_id} - R$${payment.amount} - ${payment.date}</p>`
+            ).join('');
+        }
+
+        async function createPayment() {
+            const response = await fetch('http://127.0.0.1:5000/payment', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey },
+                body: JSON.stringify({
+                    user_id: document.getElementById('paymentUserId').value,
+                    amount: parseFloat(document.getElementById('paymentAmount').value),
+                    status: document.getElementById('paymentStatus').value
+                })
+            });
+            alert((await response.json()).message);
+            listPayments();
+            showScreen('payments');
+        }
+
+        async function editPayment() {
+            const paymentId = document.getElementById('editPaymentId').value;
+            const response = await fetch(`http://127.0.0.1:5000/payments/${paymentId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey },
+                body: JSON.stringify({
+                    amount: parseFloat(document.getElementById('editPaymentAmount').value),
+                    status: document.getElementById('editPaymentStatus').value
+                })
+            });
+            alert((await response.json()).message);
+            listPayments();
+            showScreen('payments');
+        }
+
+        async function deletePayment() {
+            const paymentId = document.getElementById('deletePaymentId').value;
+            const response = await fetch(`http://127.0.0.1:5000/payment/${paymentId}`, {
+                method: 'DELETE',
+                headers: { 'x-api-key': apiKey }
+            });
+            alert((await response.json()).message);
+            listPayments();
         }
 
         // Exibir tela de login ao carregar a página

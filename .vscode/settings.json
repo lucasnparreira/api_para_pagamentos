@@ -1,0 +1,10 @@
+{
+    "sqltools.connections": [
+        {
+            "previewLimit": 50,
+            "driver": "SQLite",
+            "database": "${workspaceFolder:api_for_payments}/instance/payments.db",
+            "name": "payments_database"
+        }
+    ]
+}

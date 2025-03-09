@@ -7,7 +7,9 @@ import functools
 from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app)
+#CORS(app)
+CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
+
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///payments.db'
 db = SQLAlchemy(app)
 
@@ -17,7 +19,7 @@ class User(db.Model):
     name = db.Column(db.String(80), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(256), nullable=False)
-    api_key = db.Column(db.String(36), unique=True, nullable=False)
+    api_key = db.Column(db.String(36), unique=True, nullable=True)
     api_key_expiration = db.Column(db.DateTime, nullable=True)
     role = db.Column(db.String(30), nullable=False, default='User')
 
@@ -43,31 +45,33 @@ class Account(db.Model):
     date_open_account = db.Column(db.DateTime, nullable=False, default=datetime.now)
 
 def require_api_key(f):
-    @functools.wraps(f)  # Isso evita a sobrescrita do nome da função
+    @functools.wraps(f)
     def decorated_function(*args, **kwargs):
         api_key = request.headers.get('x-api-key')
         user = User.query.filter_by(api_key=api_key).first()
-        if not api_key or not user or user.api_key_expiration < datetime.now():
-            return jsonify({'message': 'Invalid or expired API Key'}), 403
+        if not api_key or not user:
+            return jsonify({'message': 'Invalid API Key'}), 403
+        if user.api_key_expiration and user.api_key_expiration < datetime.now():
+            return jsonify({'message': 'API Key expired'}), 403
         return f(*args, **kwargs)
     return decorated_function
 
 def insert_default_admin():
-    """Insere um usario admin padrao caso nao exista"""
-    admin = User.query.filter_by(role="Admin").first()
-
-    if not admin:
-        hashed_password = generate_password_hash("Admin", method="pbkdf2:sha256")
-        admin_user = User(
-            name="Admin",
-            email="admin@example.com",
-            password=hashed_password,
-            role="Admin",
-            api_key=uuid
-        )
-        db.session.add(admin_user)
-        db.session.commit()
-        print("Banco inicializado com sucesso!")
+    with app.app_context():
+        admin = User.query.filter_by(role="Admin").first()
+        if not admin:
+            hashed_password = generate_password_hash("Admin", method="pbkdf2:sha256")
+            admin_user = User(
+                name="Admin",
+                email="admin@example.com",
+                password=hashed_password,
+                role="Admin",
+                api_key=str(uuid.uuid4()),
+                api_key_expiration=datetime.now() + timedelta(hours=1)
+            )
+            db.session.add(admin_user)
+            db.session.commit()
+            print("Admin user created successfully!")
 
 @app.route('/register', methods=['POST'])
 def register_user():
@@ -117,31 +121,29 @@ def logout_user():
     return jsonify({'message':'Logged out successfully'}), 200
 
 # Endpoints para CRUD de usuarios
-@app.route('/users/<int:id>', methods=['PUT'])
+@app.route('/user/<int:id>', methods=['PUT'])
 @require_api_key
 def update_user(id):
     data = request.get_json()
     user = User.query.get(id)
     if not user:
-        return jsonify({'message':'User not found'}), 404
-    
-    user.name = data['name']
-    user.email = data['email']
+        return jsonify({'message': 'User not found'}), 404
+    user.name = data.get('name', user.name)
+    user.email = data.get('email', user.email)
     if 'password' in data:
         user.password = generate_password_hash(data['password'], method='pbkdf2:sha256')
     db.session.commit()
-    return jsonify({'message':'User updated successfully'}), 200
+    return jsonify({'message': 'User updated successfully'}), 200
 
-@app.route('/users/<int:id>', methods=['DELETE'])
+@app.route('/user/<int:id>', methods=['DELETE'])
 @require_api_key
 def delete_user(id):
     user = User.query.get(id)
     if not user:
-        return jsonify({'message':'User not found'}), 404
-    
+        return jsonify({'message': 'User not found'}), 404
     db.session.delete(user)
     db.session.commit()
-    return jsonify({'message':'User deleted successfully'}), 200
+    return jsonify({'message': 'User deleted successfully'}), 200
 
 @app.route('/users', methods=['GET'])
 @require_api_key
@@ -159,20 +161,19 @@ def get_users():
         })
     return jsonify(users_list), 200
 
-@app.route('/users/<int:id>', methods=['GET'])
+@app.route('/user/<int:id>', methods=['GET'])
 @require_api_key
 def get_user(id):
     user = User.query.get(id)
     if not user:
-        return jsonify({'message':'User not found'}), 404
-    
+        return jsonify({'message': 'User not found'}), 404
     return jsonify({
-        'id':user.id,
-            'name':user.name,
-            'email':user.email,
-            'api_key':user.api_key,
-            'api_key_expiration':user.api_key_expiration,
-            'role':user.role
+        'id': user.id,
+        'name': user.name,
+        'email': user.email,
+        'api_key': user.api_key,
+        'api_key_expiration': user.api_key_expiration,
+        'role': user.role
     }), 200
 
 # CRUD para contas
@@ -298,13 +299,31 @@ def create_payment():
 @require_api_key
 def update_payment(id):
     data = request.get_json()
+
     payment = Payment.query.get(id)
+
     if not payment:
         return jsonify({'message':'Payment not found'}), 404
     
+    account = Account.query.filter_by(user_id=payment.user_id).first()
+
+    if not account:
+        return jsonify({'message':f"Account not found for user_id {payment.user_id}"}), 404
+        
+    if data['status'] == 'Credit':
+        account.cash_account += data['amount']
+    
+    else:
+        if account.cash_account >= data['amount']:
+            account.cash_account -= data['amount']
+        else:
+            return jsonify({'message':'Insuficient funds'}), 400
+        
     payment.amount = data['amount']
     payment.status = data['status']
+
     db.session.commit()
+
     return jsonify({'message':'Payment updated successfully'}), 200
 
 @app.route('/payments/<int:id>', methods=['DELETE'])
@@ -411,5 +430,6 @@ def get_transaction(id):
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
+        insert_default_admin()
     app.run(debug=True)
-    insert_default_admin()
+   
