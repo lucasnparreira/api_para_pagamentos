@@ -4,123 +4,147 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pagamento API</title>
-    <style>
+    <link rel="stylesheet" href="styles.css">
+    <!-- <style>
         body { font-family: Arial, sans-serif; text-align: center; }
         .container { width: 50%; margin: auto; padding: 20px; display: none; }
         input, button { margin: 5px; padding: 10px; width: 90%; }
         .menu { margin-bottom: 20px; }
         .menu button { margin: 5px; padding: 10px; }
-    </style>
+    </style> -->
 </head>
 <body>
+    <header class="navbar">
+        <div id="title-menu-side">
+            <h3>Pagamento API</h3>
+        </div>
+        <div class="dropdown">
+            <button class="dropbtn" onclick="openNav()"> 
+                <!-- <img src="img/menu.png" id="menu-img" alt="menu"> -->
+                <i class="fa fa-caret-down"></i>
+                ☰ Menu
+            </button>
+            <div id="mySidenav" class="sidenav">
+                <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+                <a href="#login" onclick="showScreen('login')">Login</a>
+                <a href="#users" onclick="showScreen('users')">Usuários</a>
+                <a href="#accounts" onclick="showScreen('accounts')">Contas</a>
+                <a href="#payments" onclick="showScreen('payments')">Pagamentos</a>
+            </div>
+        </div>
+    </header>
     <div class="menu">
-        <button onclick="showScreen('login')">Login</button>
-        <button onclick="showScreen('users')">Usuários</button>
-        <button onclick="showScreen('accounts')">Contas</button>
-        <button onclick="showScreen('payments')">Pagamentos</button>
+        
     </div>
+        <div class="form-paginas">
+            <div id="login" class="container">
+                <h2>Login</h2>
+                <input type="email" id="loginEmail" placeholder="Email">
+                <input type="password" id="loginPassword" placeholder="Senha">
+                <button onclick="loginUser()">Login</button>
+            </div>
 
-    <div id="login" class="container">
-        <h2>Login</h2>
-        <input type="email" id="loginEmail" placeholder="Email">
-        <input type="password" id="loginPassword" placeholder="Senha">
-        <button onclick="loginUser()">Login</button>
-    </div>
+            <div id="register" class="container">
+                <h2>Registro</h2>
+                <input type="text" id="name" placeholder="Nome">
+                <input type="email" id="email" placeholder="Email">
+                <input type="password" id="password" placeholder="Senha">
+                <button onclick="registerUser()">Registrar usuário</button>
+            </div>
 
-    <div id="register" class="container">
-        <h2>Registro</h2>
-        <input type="text" id="name" placeholder="Nome">
-        <input type="email" id="email" placeholder="Email">
-        <input type="password" id="password" placeholder="Senha">
-        <button onclick="registerUser()">Registrar usuário</button>
-    </div>
+            <div id="users" class="container">
+                <h2>Usuários</h2>
+                <ul>
+                    <ol><button onclick="showScreen('userList');listUsers()">Listar Usuários</button></ol>
+                    <ol><button onclick="showScreen('register')">Registrar Usuário</button></ol>
+                    <ol><button onclick="showScreen('editUser')">Editar Usuário</button></ol>
+                    <ol><button onclick="showScreen('deleteUser')">Deletar Usuário</button></ol>
+                </ul>
+            </div> 
 
-    <div id="users" class="container">
-        <h2>Usuários</h2>
-        <button onclick="listUsers()">Listar Usuários</button>
-        <button onclick="showScreen('register')">Registrar Usuário</button>
-        <button onclick="showScreen('editUser')">Editar Usuário</button>
-        <button onclick="showScreen('deleteUser')">Deletar Usuário</button>
-        <div id="usersList"></div>
-    </div> 
+            <div id="userList" class="container" style="display: none;">
+                <h2>Lista de Usuários</h2>
+                <div id="usersList"></div>
+                <button onclick="showScreen('users')">Voltar</button>
+            </div>
+        
+            <div id="editUser" class="container">
+                <h2>Editar Usuário</h2>
+                <input type="text" id="editUserId" placeholder="ID do Usuário">
+                <input type="text" id="editUserName" placeholder="Novo Nome">
+                <input type="email" id="editUserEmail" placeholder="Novo Email">
+                <input type="password" id="editUserPassword" placeholder="Nova Senha">
+                <button onclick="editUser()">Salvar Alterações</button>
+            </div> 
 
-    <div id="editUser" class="container">
-        <h2>Editar Usuário</h2>
-        <input type="text" id="editUserId" placeholder="ID do Usuário">
-        <input type="text" id="editUserName" placeholder="Novo Nome">
-        <input type="email" id="editUserEmail" placeholder="Novo Email">
-        <input type="password" id="editUserPassword" placeholder="Nova Senha">
-        <button onclick="editUser()">Salvar Alterações</button>
-    </div> 
+            <div id="deleteUser" class="container">
+                <h2>Deletar Usuário</h2>
+                <input type="text" id="deleteUserId" placeholder="ID do Usuário">
+                <button onclick="deleteUser()">Deletar</button>
+            </div>
 
-    <div id="deleteUser" class="container">
-        <h2>Deletar Usuário</h2>
-        <input type="text" id="deleteUserId" placeholder="ID do Usuário">
-        <button onclick="deleteUser()">Deletar</button>
-    </div>
+            <div id="payments" class="container">
+                <h2>Pagamentos</h2>
+                <button onclick="listPayments()">Listar Pagamentos</button>
+                <button onclick="showScreen('createPayment')">Registrar Pagamento</button>
+                <button onclick="showScreen('editPayment')">Editar Pagamento</button>
+                <button onclick="showScreen('deletePayment')">Deletar Pagamento</button>
+                <div id="paymentList"></div>
+            </div>
+            
+            <div id="createPayment" class="container">
+                <h2>Criar Pagamento</h2>
+                <input type="text" id="paymentUserId" placeholder="ID do Usuário">
+                <input type="number" id="paymentAmount" placeholder="Valor do Pagamento">
+                <input type="text" id="paymentStatus" placeholder="Debit ou Credit">
+                <button onclick="createPayment()">Registrar Pagamento</button>
+            </div>
+            
+            <div id="editPayment" class="container">
+                <h2>Editar Pagamento</h2>
+                <input type="text" id="editPaymentId" placeholder="ID do Pagamento">
+                <input type="number" id="editPaymentAmount" placeholder="Novo Valor do Pagamento">
+                <input type="text" id="editPaymentStatus" placeholder="Debit ou Credit">
+                <button onclick="editPayment()">Salvar Alterações</button>
+            </div>
+            
+            <div id="deletePayment" class="container">
+                <h2>Deletar Pagamento</h2>
+                <input type="text" id="deletePaymentId" placeholder="ID do Pagamento">
+                <button onclick="deletePayment()">Deletar Pagamento</button>
+            </div>
 
-    <div id="payments" class="container">
-        <h2>Pagamentos</h2>
-        <button onclick="listPayments()">Listar Pagamentos</button>
-        <button onclick="showScreen('createPayment')">Registrar Pagamento</button>
-        <button onclick="showScreen('editPayment')">Editar Pagamento</button>
-        <button onclick="showScreen('deletePayment')">Deletar Pagamento</button>
-        <div id="paymentList"></div>
-    </div>
-    
-    <div id="createPayment" class="container">
-        <h2>Criar Pagamento</h2>
-        <input type="text" id="paymentUserId" placeholder="ID do Usuário">
-        <input type="number" id="paymentAmount" placeholder="Valor do Pagamento">
-        <input type="text" id="paymentStatus" placeholder="Debit ou Credit">
-        <button onclick="createPayment()">Registrar Pagamento</button>
-    </div>
-    
-    <div id="editPayment" class="container">
-        <h2>Editar Pagamento</h2>
-        <input type="text" id="editPaymentId" placeholder="ID do Pagamento">
-        <input type="number" id="editPaymentAmount" placeholder="Novo Valor do Pagamento">
-        <input type="text" id="editPaymentStatus" placeholder="Debit ou Credit">
-        <button onclick="editPayment()">Salvar Alterações</button>
-    </div>
-    
-    <div id="deletePayment" class="container">
-        <h2>Deletar Pagamento</h2>
-        <input type="text" id="deletePaymentId" placeholder="ID do Pagamento">
-        <button onclick="deletePayment()">Deletar Pagamento</button>
-    </div>
+            <div id="accounts" class="container">
+                <h2>Contas</h2>
+                <button onclick="listAccounts()">Listar Contas</button>
+                <button onclick="showScreen('createAccount')">Registrar Usuário</button>
+                <!-- <button onclick="showScreen('editUser')">Editar Usuário</button> -->
+                <button onclick="showScreen('deleteAccount')">Deletar Usuário</button>
+                <div id="accountList"></div>
+            </div>
 
-    <div id="accounts" class="container">
-        <h2>Contas</h2>
-        <button onclick="listAccounts()">Listar Contas</button>
-        <button onclick="showScreen('createAccount')">Registrar Usuário</button>
-        <!-- <button onclick="showScreen('editUser')">Editar Usuário</button> -->
-        <button onclick="showScreen('deleteAccount')">Deletar Usuário</button>
-        <div id="accountList"></div>
-    </div>
+            <div id="createAccount" class="container">
+                <h2>Criar Conta</h2>
+                <input type="text" id="accountUserId" placeholder="ID do Usuario">
+                <input type="number" id="accountBalance" placeholder="Saldo Inicial">
+                <button onclick="createAccount()">Registrar conta</button>
+            </div>
 
-    <div id="createAccount" class="container">
-        <h2>Criar Conta</h2>
-        <input type="text" id="accountUserId" placeholder="ID do Usuario">
-        <input type="number" id="accountBalance" placeholder="Saldo Inicial">
-        <button onclick="createAccount()">Registrar conta</button>
-    </div>
+            <!-- <div id="editAccount" class="container">
+                <h2>Editar Conta</h2>
+                <input type="text" id="editUserId" placeholder="ID do Usuário">
+                <input type="text" id="editUserName" placeholder="Novo Nome">
+                <input type="email" id="editUserEmail" placeholder="Novo Email">
+                <input type="password" id="editUserPassword" placeholder="Nova Senha">
+                <button onclick="editUser()">Salvar Alterações</button>
+            </div>  -->
 
-    <!-- <div id="editAccount" class="container">
-        <h2>Editar Conta</h2>
-        <input type="text" id="editUserId" placeholder="ID do Usuário">
-        <input type="text" id="editUserName" placeholder="Novo Nome">
-        <input type="email" id="editUserEmail" placeholder="Novo Email">
-        <input type="password" id="editUserPassword" placeholder="Nova Senha">
-        <button onclick="editUser()">Salvar Alterações</button>
-    </div>  -->
-
-    <div id="deleteAccount" class="container">
-        <h2>Deletar Conta</h2>
-        <input type="text" id="deleteAccountId" placeholder="ID do Usuário">
-        <button onclick="deleteUser()">Deletar Conta</button>
-    </div>
-
+            <div id="deleteAccount" class="container">
+                <h2>Deletar Conta</h2>
+                <input type="text" id="deleteAccountId" placeholder="ID do Usuário">
+                <button onclick="deleteUser()">Deletar Conta</button>
+            </div>
+        </div>
 
     <script>
         let apiKey = "";
@@ -128,6 +152,7 @@
         function showScreen(screenId) {
             document.querySelectorAll('.container').forEach(el => el.style.display = 'none');
             document.getElementById(screenId).style.display = 'block';
+            closeNav();
         }
         
         async function registerUser() {
@@ -141,6 +166,7 @@
                 })
             });
             alert((await response.json()).message);
+            closeNav();
         }
 
         async function loginUser() {
@@ -320,6 +346,18 @@
 
         // Exibir tela de login ao carregar a página
         showScreen('login');
+
+        function openNav() {
+            document.getElementById("mySidenav").style.width = "250px";
+        }
+
+        function closeNav() {
+            document.getElementById("mySidenav").style.width = "0";
+            
+            setTimeout(() => {
+                // location.reload();
+            }, 200);
+        }
     </script>
 </body>
 </html>

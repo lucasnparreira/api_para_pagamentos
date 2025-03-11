@@ -1,0 +1,207 @@
+/* Reset básico */
+body, h3, a, button {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    text-decoration: none;
+    color: inherit;
+}
+
+/* Estilo do cabeçalho */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #222; /* Cor do fundo semelhante ao site */
+    padding: 15px 20px;
+    color: white;
+    position: fixed;
+    width: 100%;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+
+/* .form-paginas {
+    margin-top: 12%;
+    margin-left: 4%;
+} */
+
+/* Logo ou título do menu */
+#title-menu-side h3 {
+    font-size: 22px;
+    font-weight: bold;
+    padding: 10px;
+    margin-left: 4%;
+}
+
+/* Botão do menu hamburguer */
+.dropbtn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 10px;
+    padding-right: 5%;
+    margin-left: -85%;
+}
+
+.dropbtn img {
+    width: 30px;
+    height: auto;
+}
+
+/* Sidebar */
+.sidenav {
+    height: 100%;
+    width: 0;
+    position: fixed;
+    top: 0;
+    right: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    overflow-x: hidden;
+    transition: 0.5s;
+    padding-top: 60px;
+}
+
+/* Links do menu */
+.sidenav a {
+    padding: 12px 20px;
+    text-decoration: none;
+    font-size: 18px;
+    color: #ddd;
+    display: block;
+    transition: 0.3s;
+}
+
+.sidenav a:hover {
+    background-color: #555;
+    color: white;
+}
+
+/* Botão de fechar */
+.closebtn {
+    position: absolute;
+    top: 10px;
+    right: 25px;
+    font-size: 36px;
+    color: white;
+    cursor: pointer;
+}
+
+/* Estilização geral */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+/* Containers das telas secundárias */
+.container {
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    width: 350px;
+    display: none; /* Esconde todas as telas por padrão */
+    text-align: center;
+}
+
+/* Títulos */
+.container h2 {
+    margin-bottom: 20px;
+    color: #333;
+}
+
+/* Inputs estilizados */
+.container input {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 16px;
+    transition: 0.3s;
+}
+
+/* Efeito ao focar no input */
+.container input:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+    outline: none;
+}
+
+/* Botões estilizados */
+.container button {
+    width: 100%;
+    padding: 12px;
+    background: white;
+    border: none;
+    border-radius: 5px;
+    color: black;
+    font-size: 16px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+/* Efeito ao passar o mouse no botão */
+.container button:hover {
+    background: gainsboro;
+}
+
+/* Área de listagem de usuários/pagamentos */
+#usersList, #paymentList, #accountList {
+    text-align: left;
+    margin-top: 15px;
+}
+
+/* Estilo para os botões de editar e excluir */
+#usersList button, #paymentList button, #accountList button {
+    padding: 5px 10px;
+    /* margin-left: 5px; */
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#usersList button:first-of-type {
+    background: #ffc107;
+    color: black;
+}
+
+#usersList button:last-of-type {
+    background: #dc3545;
+    color: white;
+}
+
+#usersList button:first-of-type:hover {
+    background: #e0a800;
+}
+
+#usersList button:last-of-type:hover {
+    background: #c82333;
+}
+
+/* Responsividade */
+@media screen and (max-width: 768px) {
+    .navbar {
+        padding: 10px 15px;
+    }
+    
+    #title-menu-side h3 {
+        font-size: 18px;
+    }
+    
+    .dropbtn img {
+        width: 25px;
+    }
+    
+    .sidenav a {
+        font-size: 16px;
+    }
+}
