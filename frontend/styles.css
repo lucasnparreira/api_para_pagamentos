@@ -161,7 +161,7 @@ body {
 }
 
 /* Estilo para os botões de editar e excluir */
-#usersList button, #paymentList button, #accountList button {
+#usersList button, #paymentList button, #accountList button #paymentsList{
     padding: 5px 10px;
     /* margin-left: 5px; */
     border: none;
@@ -170,21 +170,29 @@ body {
 }
 
 #usersList button:first-of-type {
-    background: #ffc107;
+    background: gainsboro;
     color: black;
+    width: 10%;
+    padding: 5px;
 }
 
 #usersList button:last-of-type {
-    background: #dc3545;
+    background: gainsboro;
     color: white;
+    width: 10%;
+    padding: 5px;
 }
 
 #usersList button:first-of-type:hover {
-    background: #e0a800;
+    background: gainsboro;
+    width: 10%;
+    padding: 5px;
 }
 
 #usersList button:last-of-type:hover {
-    background: #c82333;
+    background: gainsboro;
+    width: 10%;
+    padding: 5px;
 }
 
 /* Responsividade */

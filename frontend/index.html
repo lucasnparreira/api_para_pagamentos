@@ -75,6 +75,7 @@
                 <input type="email" id="editUserEmail" placeholder="Novo Email">
                 <input type="password" id="editUserPassword" placeholder="Nova Senha">
                 <button onclick="editUser()">Salvar Alterações</button>
+                <button onclick="showScreen('user')">Voltar</button>
             </div> 
 
             <div id="deleteUser" class="container">
@@ -85,11 +86,16 @@
 
             <div id="payments" class="container">
                 <h2>Pagamentos</h2>
-                <button onclick="listPayments()">Listar Pagamentos</button>
+                <button onclick="showScreen('paymentsList');listPayments()">Listar Pagamentos</button>
                 <button onclick="showScreen('createPayment')">Registrar Pagamento</button>
                 <button onclick="showScreen('editPayment')">Editar Pagamento</button>
                 <button onclick="showScreen('deletePayment')">Deletar Pagamento</button>
+            </div>
+
+            <div id="paymentsList" class="container" style="display: none;">
+                <h2>Lista de Pagamentos</h2>
                 <div id="paymentList"></div>
+                <button onclick="showScreen('payments')">Voltar</button>
             </div>
             
             <div id="createPayment" class="container">
@@ -98,6 +104,7 @@
                 <input type="number" id="paymentAmount" placeholder="Valor do Pagamento">
                 <input type="text" id="paymentStatus" placeholder="Debit ou Credit">
                 <button onclick="createPayment()">Registrar Pagamento</button>
+                <button onclick="showScreen('payments')">Voltar</button>
             </div>
             
             <div id="editPayment" class="container">
@@ -106,6 +113,7 @@
                 <input type="number" id="editPaymentAmount" placeholder="Novo Valor do Pagamento">
                 <input type="text" id="editPaymentStatus" placeholder="Debit ou Credit">
                 <button onclick="editPayment()">Salvar Alterações</button>
+                <button onclick="showScreen('payments')">Voltar</button>
             </div>
             
             <div id="deletePayment" class="container">
@@ -128,6 +136,7 @@
                 <input type="text" id="accountUserId" placeholder="ID do Usuario">
                 <input type="number" id="accountBalance" placeholder="Saldo Inicial">
                 <button onclick="createAccount()">Registrar conta</button>
+                <button onclick="showScreen('accounts')">Voltar</button>
             </div>
 
             <!-- <div id="editAccount" class="container">
