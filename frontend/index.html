@@ -44,12 +44,15 @@
                 <button onclick="loginUser()">Login</button>
             </div>
 
+            <div id="home"></div> 
+            
             <div id="register" class="container">
                 <h2>Registro</h2>
                 <input type="text" id="name" placeholder="Nome">
                 <input type="email" id="email" placeholder="Email">
                 <input type="password" id="password" placeholder="Senha">
                 <button onclick="registerUser()">Registrar usuário</button>
+                <button onclick="showScreen('users')">Voltar</button>
             </div>
 
             <div id="users" class="container">
@@ -75,13 +78,14 @@
                 <input type="email" id="editUserEmail" placeholder="Novo Email">
                 <input type="password" id="editUserPassword" placeholder="Nova Senha">
                 <button onclick="editUser()">Salvar Alterações</button>
-                <button onclick="showScreen('user')">Voltar</button>
+                <button onclick="showScreen('users')">Voltar</button>
             </div> 
 
             <div id="deleteUser" class="container">
                 <h2>Deletar Usuário</h2>
                 <input type="text" id="deleteUserId" placeholder="ID do Usuário">
                 <button onclick="deleteUser()">Deletar</button>
+                <button onclick="showScreen('users')">Voltar</button>
             </div>
 
             <div id="payments" class="container">
@@ -124,11 +128,16 @@
 
             <div id="accounts" class="container">
                 <h2>Contas</h2>
-                <button onclick="listAccounts()">Listar Contas</button>
-                <button onclick="showScreen('createAccount')">Registrar Usuário</button>
+                <button onclick="showScreen('accountList');listAccounts()">Listar Contas</button>
+                <button onclick="showScreen('createAccount')">Registrar Conta</button>
                 <!-- <button onclick="showScreen('editUser')">Editar Usuário</button> -->
-                <button onclick="showScreen('deleteAccount')">Deletar Usuário</button>
-                <div id="accountList"></div>
+                <button onclick="showScreen('deleteAccount')">Deletar Conta</button>
+            </div>
+
+            <div id="accountList" class="container" style="display: none;">
+                <h2>Lista de Contas ativas</h2>
+                <div id="accountsList"></div>
+                <button onclick="showScreen('accounts')">Voltar</button>
             </div>
 
             <div id="createAccount" class="container">
@@ -152,6 +161,7 @@
                 <h2>Deletar Conta</h2>
                 <input type="text" id="deleteAccountId" placeholder="ID do Usuário">
                 <button onclick="deleteUser()">Deletar Conta</button>
+                <button onclick="showScreen('accounts')">Voltar</button>
             </div>
         </div>
 
@@ -191,7 +201,7 @@
             if (response.ok) {
                 apiKey = data.api_key;
                 alert("Login bem-sucedido!");
-                showScreen('users');
+                showScreen('home');
             } else {
                 alert("Erro: " + data.message);
             }
@@ -249,7 +259,7 @@
                 headers: { 'x-api-key': apiKey }
             });
             const accounts = await response.json();
-            document.getElementById('accountList').innerHTML = accounts.map(account => 
+            document.getElementById('accountsList').innerHTML = accounts.map(account => 
                 `<p>${account.user_id} - ${account.name} - ${account.cash_account} - ${account.date_open_account}</p>`).join('');
         }
 
